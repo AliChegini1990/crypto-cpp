@@ -1,2 +1,5 @@
-# crypto-cpp
-A C++ library for encryption and decryption 
+# Crypto-CPP
+
+A C++ wrapper for encryption and decryption.
+
+
