@@ -1,13 +1,16 @@
 #ifndef _CRYPTOCPP_H_
 #define _CRYPTOCPP_H_
 
-#include <string>
+#include <cstring>
 #include <unordered_map>
 
 /**
  * Using BSD crypt for password hashing
  *
  */
+
+
+using namespace std;
 
 #include <crypt.h>
 
@@ -28,7 +31,7 @@ public:
    */
   enum class EncryptionType{
     yescrypt,
-    gost-yescrypt,
+    gost_yescrypt,
     scrypt,
     bcrypt,
     sha512crypt,
@@ -74,8 +77,8 @@ public:
    EncryptionType type_;
 
    unordered_map<string, EncryptionType> enc_text{
-    {"$y$", EncryptionType::bcrypt}
-   }
+    {"$y$", EncryptionType::bcrypt},
+   };
 };
 
 
