@@ -11,6 +11,6 @@ aux_source_directory(src SRC)
 add_library(${CMAKE_PROJECT_NAME} SHARED ${SRC})
 
 # compile options
-target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -std=c++11 -fsanitize=address)
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -std=c++11 -fsanitize=address -Wall)
 
 # include test
