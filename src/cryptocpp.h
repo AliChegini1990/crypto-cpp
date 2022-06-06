@@ -33,7 +33,7 @@ public:
 
 class IBSDCrypt {
 public:
-  virtual unique_ptr<IEncrypt> createBcrypt() = 0;
+  virtual std::unique_ptr<IEncrypt> createBcrypt() = 0;
   virtual ~IBSDCrypt() {}
 };
 
@@ -97,12 +97,12 @@ public:
    */
   bool Compare(const std::string &enc_a, const std::string &plain_b);
 
-  shared_ptr<IEncrypt> getInternalEncryption(){return e_;}
+  std::shared_ptr<IEncrypt> getInternalEncryption(){return e_;}
 
 private:
-  unique_ptr<IEncrypt> createBcrypt() override;
+  std::unique_ptr<IEncrypt> createBcrypt() override;
   EncryptionType type_;
-  shared_ptr<IEncrypt> e_;
+  std::shared_ptr<IEncrypt> e_;
 };
 
 #endif

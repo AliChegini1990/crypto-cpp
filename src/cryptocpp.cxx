@@ -1,5 +1,7 @@
 #include "cryptocpp.h"
 
+using namespace std;
+
 BSDCrypt::BSDCrypt() { setType(EncryptionType::bcrypt); }
 
 BSDCrypt::BSDCrypt(EncryptionType enc) { setType(enc); }
