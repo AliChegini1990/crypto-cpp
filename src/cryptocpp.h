@@ -3,7 +3,6 @@
 #include <crypt.h>
 #include <cstring>
 #include <memory>
-using namespace std;
 
 /**
  * Using BSD crypt for password hashing
@@ -13,7 +12,7 @@ using namespace std;
 class IEncrypt {
 public:
   virtual ~IEncrypt() {}
-  virtual string Encrypt(const string &) = 0;
+  virtual std::string Encrypt(const std::string &) = 0;
 };
 
 class Bcrypt : public IEncrypt {
@@ -21,20 +20,20 @@ public:
   explicit Bcrypt() {}
   ~Bcrypt() {}
 
-  inline const string name() const { return string("bcrypt"); }
-  inline const string prefix() const { return string("$2b$"); }
+  inline const std::string name() const { return std::string("bcrypt"); }
+  inline const std::string prefix() const { return std::string("$2b$"); }
   inline const int hashSize() const { return 184; }
   inline const int maxPassphraseLen() const { return 72; }
   inline const int saltSize() const { return 128; }
   inline const int cpuCost() const { return 12; /* 4 to 31 (logarithmic) */ };
-  inline const string regexCheck() { return string("\\$2[abxy]\\$[0-9]{2}\\$[./A-Za-z0-9]{53}");}
+  inline const std::string regexCheck() { return std::string("\\$2[abxy]\\$[0-9]{2}\\$[./A-Za-z0-9]{53}");}
 
-  string Encrypt(const string &inp) override;
+  std::string Encrypt(const std::string &inp) override;
 };
 
 class IBSDCrypt {
 public:
-  virtual unique_ptr<IEncrypt> createBcrypt() = 0;
+  virtual std::unique_ptr<IEncrypt> createBcrypt() = 0;
   virtual ~IBSDCrypt() {}
 };
 
@@ -79,31 +78,31 @@ public:
   void setType(EncryptionType type);
 
   /**
-   * Encrypt the input string
+   * Encrypt the input std::string
    *
    * @param inp input value
-   * @return An encrypted string. If error occured this function throw an
+   * @return An encrypted std::string. If error occured this function throw an
    * exception.
    *
    */
-  string Encrypt(const string &inp);
+  std::string Encrypt(const std::string &inp);
 
   /**
-   * Compare encrpted string to plain text
+   * Compare encrpted std::string to plain text
    *
-   * @param enc_a encrypted string
+   * @param enc_a encrypted std::string
    * @param plain_b palin text
    * @return Return true if they are equals
    *
    */
-  bool Compare(const string &enc_a, const string &plain_b);
+  bool Compare(const std::string &enc_a, const std::string &plain_b);
 
-  shared_ptr<IEncrypt> getInternalEncryption(){return e_;}
+  std::shared_ptr<IEncrypt> getInternalEncryption(){return e_;}
 
 private:
-  unique_ptr<IEncrypt> createBcrypt() override;
+  std::unique_ptr<IEncrypt> createBcrypt() override;
   EncryptionType type_;
-  shared_ptr<IEncrypt> e_;
+  std::shared_ptr<IEncrypt> e_;
 };
 
 #endif
