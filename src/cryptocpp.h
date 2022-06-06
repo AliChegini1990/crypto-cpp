@@ -28,6 +28,8 @@ public:
   inline const int maxPassphraseLen() const { return 72; }
   inline const int saltSize() const { return 128; }
   inline const int cpuCost() const { return 12; /* 4 to 31 (logarithmic) */ };
+  inline const string regexCheck() { return string(R"(\$2[abxy]\$[0-9]{2}\$[./A-Za-z0-9]{53})");}
+
   string Encrypt(const string &inp) override;
 };
 
@@ -97,10 +99,12 @@ public:
    */
   bool Compare(const string &enc_a, const string &plain_b);
 
+  shared_ptr<IEncrypt> getInternalEncryption(){return e_;}
+
 private:
   unique_ptr<IEncrypt> createBcrypt() override;
   EncryptionType type_;
-  unique_ptr<IEncrypt> e_;
+  shared_ptr<IEncrypt> e_;
 };
 
 #endif
