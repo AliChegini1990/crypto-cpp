@@ -1,7 +1,9 @@
 #include "cryptocpp.h"
 
 BSDCrypt::BSDCrypt() { setType(EncryptionType::bcrypt); }
+
 BSDCrypt::BSDCrypt(EncryptionType enc) { setType(enc); }
+
 BSDCrypt::~BSDCrypt() {}
 
 string BSDCrypt::Encrypt(const string &inp) { return e_->Encrypt(inp); }
@@ -28,16 +30,17 @@ unique_ptr<IEncrypt> BSDCrypt::createBcrypt() {
 string Bcrypt::Encrypt(const string &inp) {
   struct crypt_data data = {};
   // memset(&data,0,sizeof(data));
-
+  
   char *setting =
       crypt_gensalt_rn(prefix().c_str(), static_cast<unsigned long>(cpuCost()),
-                       NULL, 0, data.output, CRYPT_OUTPUT_SIZE);
+                       NULL, 0, data.setting, CRYPT_OUTPUT_SIZE);
 
   if (setting == NULL) {
     throw runtime_error{"Encryption setting is null"};
   }
 
-  if (crypt_r(inp.c_str(), setting, &data) == NULL) {
+  char *out = crypt_rn(inp.c_str(), setting, &data, sizeof(data));
+  if (out == NULL) {
     throw runtime_error{"Encryption Failed"};
   }
 

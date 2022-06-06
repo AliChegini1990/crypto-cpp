@@ -1,6 +1,5 @@
 #ifndef _CRYPTOCPP_H_
 #define _CRYPTOCPP_H_
-
 #include <crypt.h>
 #include <cstring>
 #include <memory>
