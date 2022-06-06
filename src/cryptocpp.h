@@ -1,35 +1,49 @@
 #ifndef _CRYPTOCPP_H_
 #define _CRYPTOCPP_H_
 
+#include <crypt.h>
 #include <cstring>
-#include <unordered_map>
+#include <memory>
+using namespace std;
 
 /**
  * Using BSD crypt for password hashing
  *
  */
 
+class IEncrypt {
+public:
+  virtual ~IEncrypt() {}
+  virtual string Encrypt(const string &) = 0;
+};
 
-using namespace std;
+class Bcrypt : public IEncrypt {
+public:
+  explicit Bcrypt() {}
+  ~Bcrypt() {}
 
-#include <crypt.h>
+  inline const string name() const { return string("bcrypt"); }
+  inline const string prefix() const { return string("$2b$"); }
+  inline const int hashSize() const { return 184; }
+  inline const int maxPassphraseLen() const { return 72; }
+  inline const int saltSize() const { return 128; }
+  inline const int cpuCost() const { return 12; /* 4 to 31 (logarithmic) */ };
+  string Encrypt(const string &inp) override;
+};
 
-class BSDCrypt {
+class IBSDCrypt {
+public:
+  virtual unique_ptr<IEncrypt> createBcrypt() = 0;
+  virtual ~IBSDCrypt() {}
+};
+
+class BSDCrypt : public IBSDCrypt {
 
 public:
-  BSDCrypt();
-  ~BSDCrypt();
-
-  BSDCrypt(const BSDCrypt &) = delete;
-  BSDCrypt &operator=(const BSDCrypt &) = delete;
-
-  BSDCrypt(BSDCrypt &&) = delete;
-  BSDCrypt &operator=(BSDCrypt &&) = delete;
-
   /**
    * A list of supported encryption types
    */
-  enum class EncryptionType{
+  enum class EncryptionType {
     yescrypt,
     gost_yescrypt,
     scrypt,
@@ -45,18 +59,30 @@ public:
     NT
   };
 
+  BSDCrypt();
+  BSDCrypt(EncryptionType enc);
+
+  ~BSDCrypt();
+
+  BSDCrypt(const BSDCrypt &) = delete;
+  BSDCrypt &operator=(const BSDCrypt &) = delete;
+
+  BSDCrypt(BSDCrypt &&) = delete;
+  BSDCrypt &operator=(BSDCrypt &&) = delete;
+
   /**
    * Set an encryption type
    *
    * @param type encryption type
    */
-  inline void setType(EncryptionType type) noexcept {type_ = type;}
-  
+  void setType(EncryptionType type);
+
   /**
    * Encrypt the input string
-   * 
+   *
    * @param inp input value
-   * @return An encrypted string. If error occured this function throw an exception.
+   * @return An encrypted string. If error occured this function throw an
+   * exception.
    *
    */
   string Encrypt(const string &inp);
@@ -65,21 +91,16 @@ public:
    * Compare encrpted string to plain text
    *
    * @param enc_a encrypted string
-   * @param plain_b palin text 
+   * @param plain_b palin text
    * @return Return true if they are equals
    *
    */
   bool Compare(const string &enc_a, const string &plain_b);
-  
 
-  private:
-
-   EncryptionType type_;
-
-   unordered_map<string, EncryptionType> enc_text{
-    {"$y$", EncryptionType::bcrypt},
-   };
+private:
+  unique_ptr<IEncrypt> createBcrypt() override;
+  EncryptionType type_;
+  unique_ptr<IEncrypt> e_;
 };
-
 
 #endif

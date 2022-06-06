@@ -1,59 +1,45 @@
 #include "cryptocpp.h"
 
-BSDCrypt::BSDCrypt(){
-  
-  // set default encryption
-  setType(EncryptionType::bcrypt);
-}
-
+BSDCrypt::BSDCrypt() { setType(EncryptionType::bcrypt); }
+BSDCrypt::BSDCrypt(EncryptionType enc) { setType(enc); }
 BSDCrypt::~BSDCrypt() {}
 
-string BSDCrypt::Encrypt(const string &inp) {
+string BSDCrypt::Encrypt(const string &inp) { return e_->Encrypt(inp); }
 
-  struct crypt_data data {
-    .initialized = 0
-  };
-  // data.initialized = 0;
-  memset(&data, 0, sizeof(data));
+void BSDCrypt::setType(EncryptionType type) {
+  type_ = type;
 
-  // char *crypt_r(const char *phrase, const char *setting, struct crypt_data
-  // *data);
-
-  // struct crypt_data {
-  //  char output[CRYPT_OUTPUT_SIZE];
-  //  char setting[CRYPT_OUTPUT_SIZE];
-  //  char phrase[CRYPT_MAX_PASSPHRASE_SIZE];
-  //  char initialized;
-  //};
-
-  // char *
-  //  crypt_gensalt_rn(const char * prefix, unsigned long count, const char
-  //  *rbytes, int nrbytes, char * output, int output_size);
-
-
-
-
-// hash based on the Blowfish block cipher, modified to have an extra-expensive key schedule.  Originally developed by Niels Provos and David Mazieres
-//     for OpenBSD and also supported on recent versions of FreeBSD and NetBSD, on Solaris 10 and newer, and on several GNU/*/Linux distributions.
-//
-//     Prefix
-//         "$2b$"
-//
-//     Hashed passphrase format
-//         \$2[abxy]\$[0-9]{2}\$[./A-Za-z0-9]{53}
-//
-//     Maximum passphrase length
-//         72 characters
-//
-//     Hash size
-//         184 bits
-//
-//     Salt size
-//         128 bits
-//
-//     CPU time cost parameter
-//         4 to 31 (logarithmic)
-
+  switch (type) {
+  case EncryptionType::bcrypt:
+    e_ = createBcrypt();
+    break;
+  default:
+    throw std::runtime_error{"Encryption type is not supported"};
+    break;
+  }
 }
 
-bool BSDCrypt::Compare(const string &a, const string &b) {}
+bool BSDCrypt::Compare(const string &a, const string &b) { return false; }
+
+unique_ptr<IEncrypt> BSDCrypt::createBcrypt() {
+  return unique_ptr<IEncrypt>{new Bcrypt()};
+}
+
+string Bcrypt::Encrypt(const string &inp) {
+  struct crypt_data data = {};
+  // memset(&data,0,sizeof(data));
+
+  char *setting =
+      crypt_gensalt_rn(prefix().c_str(), static_cast<unsigned long>(cpuCost()),
+                       NULL, 0, data.output, CRYPT_OUTPUT_SIZE);
+
+  if (setting == NULL) {
+    throw runtime_error{"Encryption setting is null"};
+  }
+
+  if (crypt_r(inp.c_str(), setting, &data) == NULL) {
+    throw runtime_error{"Encryption Failed"};
+  }
+
+  return string(data.output, CRYPT_OUTPUT_SIZE);
+}
