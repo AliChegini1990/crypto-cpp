@@ -6,7 +6,18 @@ BSDCrypt::BSDCrypt(EncryptionType enc) { setType(enc); }
 
 BSDCrypt::~BSDCrypt() {}
 
-string BSDCrypt::Encrypt(const string &inp) { return e_->Encrypt(inp); }
+string BSDCrypt::Encrypt(const string &inp) {
+
+  string out = e_->Encrypt(inp);
+  switch (type_) {
+  case EncryptionType::bcrypt:
+    out = out.erase(0, 7);
+    break;
+  default:
+    out = "";
+  }
+  return out;
+}
 
 void BSDCrypt::setType(EncryptionType type) {
   type_ = type;
@@ -30,7 +41,7 @@ unique_ptr<IEncrypt> BSDCrypt::createBcrypt() {
 string Bcrypt::Encrypt(const string &inp) {
   struct crypt_data data = {};
   // memset(&data,0,sizeof(data));
-  
+
   char *setting =
       crypt_gensalt_rn(prefix().c_str(), static_cast<unsigned long>(cpuCost()),
                        NULL, 0, data.setting, CRYPT_OUTPUT_SIZE);
@@ -44,5 +55,5 @@ string Bcrypt::Encrypt(const string &inp) {
     throw runtime_error{"Encryption Failed"};
   }
 
-  return string(data.output, CRYPT_OUTPUT_SIZE);
+  return string(data.output);
 }
