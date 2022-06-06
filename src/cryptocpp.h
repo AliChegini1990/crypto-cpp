@@ -20,6 +20,9 @@ public:
   explicit Bcrypt() {}
   ~Bcrypt() {}
 
+  Bcrypt(const Bcrypt &) = delete;
+  Bcrypt &operator=(const Bcrypt &) = delete;
+
   inline const std::string name() const { return std::string("bcrypt"); }
   inline const std::string prefix() const { return std::string("$2b$"); }
   inline const int hashSize() const { return 184; }
@@ -70,12 +73,7 @@ public:
   BSDCrypt(BSDCrypt &&) = delete;
   BSDCrypt &operator=(BSDCrypt &&) = delete;
 
-  /**
-   * Set an encryption type
-   *
-   * @param type encryption type
-   */
-  void setType(EncryptionType type);
+
 
   /**
    * Encrypt the input std::string
@@ -97,12 +95,20 @@ public:
    */
   bool Compare(const std::string &enc_a, const std::string &plain_b);
 
-  std::shared_ptr<IEncrypt> getInternalEncryption(){return e_;}
-
-private:
   std::unique_ptr<IEncrypt> createBcrypt() override;
+  
+ protected:
   EncryptionType type_;
-  std::shared_ptr<IEncrypt> e_;
+  std::unique_ptr<IEncrypt> e_;
+
+ private:
+
+  /**
+   * Set an encryption type
+   *
+   * @param type encryption type
+   */
+  void setType(EncryptionType type);
 };
 
 #endif
