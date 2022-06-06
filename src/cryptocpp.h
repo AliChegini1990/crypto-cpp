@@ -101,8 +101,6 @@ public:
   EncryptionType type_;
   std::unique_ptr<IEncrypt> e_;
 
- private:
-
   /**
    * Set an encryption type
    *
