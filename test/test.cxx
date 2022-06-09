@@ -20,19 +20,35 @@ public:
       BSDCrypt crypt(BSDCrypt::EncryptionType::bcrypt);
       cout << "input: " << input << endl;
 
-      string out = crypt.Encrypt(input);
+      string out = crypt.encrypt(input);
       cout << "output: " << out << endl;
 
       // verify output
       auto &base = dynamic_cast<Bcrypt &>(*e_);
       std::regex re(base.regexCheck());
-      out = base.prefix() + to_string(base.cpuCost()) + "$" + out;
-      cout << "setting + encoded string : " << out << endl;
+      string full_out = base.prefix() + to_string(base.cpuCost()) + "$" + out;
 
-      if (!std::regex_match(out, re)) {
+      if (!std::regex_match(full_out, re)) {
         cerr << "Encryption Failed: out put is not correct" << endl;
         throw runtime_error{"Regex is not match"};
       }
+
+      if(!crypt.compare(out,"test1")){
+         cerr << "Comparison Failed" << endl;
+         throw runtime_error{"Comnparison Failed"};
+      }
+
+      if(crypt.compare(out,"")){
+         cerr << "Comparison Failed" << endl;
+         throw runtime_error{"Comnparison Failed with empty string"};
+      }
+
+      if(crypt.compare(out,"0000000000000000000000")){
+         cerr << "Comparison Failed" << endl;
+         throw runtime_error{"Comnparison Failed with invalid string"};
+      }
+
+
       cout << "Successful" << endl;
       cout << "==========" << endl;
 
@@ -62,14 +78,13 @@ public:
       BSDCrypt crypt(BSDCrypt::EncryptionType::bcrypt);
       cout << "input: " << input << endl;
 
-      string out = crypt.Encrypt(input);
+      string out = crypt.encrypt(input);
       cout << "output: " << out << endl;
 
       // verify output
       auto& base = dynamic_cast<Bcrypt &>(*e_);
       std::regex re(base.regexCheck());
       out = base.prefix() + to_string(base.cpuCost()) + "$" + out;
-      cout << "setting + encoded string : " << out << endl;
 
       if (!std::regex_match(out, re)) {
         cerr << "Encryption Failed: out put is not correct" << endl;

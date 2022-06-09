@@ -12,7 +12,11 @@
 class IEncrypt {
 public:
   virtual ~IEncrypt() {}
-  virtual std::string Encrypt(const std::string &) = 0;
+  virtual std::string encrypt(const std::string &) = 0;
+  virtual std::string encrypt(const std::string &inp,
+                              const std::string &salt) = 0;
+  virtual bool compare(const std::string encrypted_string,
+                       const std::string plain_text) = 0;
 };
 
 class Bcrypt : public IEncrypt {
@@ -29,9 +33,14 @@ public:
   inline const int maxPassphraseLen() const { return 72; }
   inline const int saltSize() const { return 128; }
   inline const int cpuCost() const { return 12; /* 4 to 31 (logarithmic) */ };
-  inline const std::string regexCheck() { return std::string("\\$2[abxy]\\$[0-9]{2}\\$[./A-Za-z0-9]{53}");}
+  inline const std::string regexCheck() {
+    return std::string("\\$2[abxy]\\$[0-9]{2}\\$[./A-Za-z0-9]{53}");
+  }
 
-  std::string Encrypt(const std::string &inp) override;
+  std::string encrypt(const std::string &inp, const std::string &salt) override;
+  std::string encrypt(const std::string &inp) override;
+  bool compare(const std::string encrypted_string,
+               const std::string plain_text) override;
 };
 
 class IBSDCrypt {
@@ -73,8 +82,6 @@ public:
   BSDCrypt(BSDCrypt &&) = delete;
   BSDCrypt &operator=(BSDCrypt &&) = delete;
 
-
-
   /**
    * Encrypt the input std::string
    *
@@ -83,7 +90,7 @@ public:
    * exception.
    *
    */
-  std::string Encrypt(const std::string &inp);
+  std::string encrypt(const std::string &inp);
 
   /**
    * Compare encrpted std::string to plain text
@@ -93,13 +100,25 @@ public:
    * @return Return true if they are equals
    *
    */
-  bool Compare(const std::string &enc_a, const std::string &plain_b);
+  bool compare(const std::string &enc_a, const std::string &plain_b);
 
   std::unique_ptr<IEncrypt> createBcrypt() override;
-  
- protected:
+
+protected:
   EncryptionType type_;
   std::unique_ptr<IEncrypt> e_;
+
+  /**
+   * Encrypt the input std::string
+   *
+   * @param inp input value
+   * @param salt a salt
+   *
+   * @return An encrypted std::string. If error occured this function throw an
+   * exception.
+   *
+   */
+  std::string encrypt(const std::string &inp, const std::string &salt);
 
   /**
    * Set an encryption type
